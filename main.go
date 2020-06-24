@@ -11,14 +11,14 @@ import (
 // 重定向
 // file:redirect.go
 
-var old = "/setu/latest"
-var new = "/setu/v0.1" + config.Version
+var oldUri = "/setu/latest"
+var newUri = "/setu/v0.1" + config.Version
 
 func redirect(url string) string {
-	if strings.Index(url, old) == 0 {
-		return strings.Replace(url, old, new, 1)
+	if strings.Index(url, oldUri) == 0 {
+		return strings.Replace(url, oldUri, newUri, 1)
 	}
-	if strings.Index(url, new) == 0 {
+	if strings.Index(url, newUri) == 0 {
 		return url
 	}
 	return ""
@@ -33,14 +33,14 @@ type command struct {
 	handler func(string, http.ResponseWriter) bool
 }
 
-var command_list = []command{
-	command{"/info", "GET", info_handler},
-	command{"/view", "GET", view_handler},
-	command{"/upload", "POST", upload_handler},
+var commandList = []command{
+	{"/info", "GET", infoHandler},
+	{"/view", "GET", viewHandler},
+	{"/upload", "POST", uploadHandler},
 }
 
-func command_judge(url string, method string, w http.ResponseWriter) bool {
-	for _, c := range command_list {
+func commandJudge(url string, method string, w http.ResponseWriter) bool {
+	for _, c := range commandList {
 		if method == c.method && strings.Index(url, c.url) == 0 {
 			if !c.handler(url, w) {
 				return false
@@ -55,20 +55,20 @@ func command_judge(url string, method string, w http.ResponseWriter) bool {
 
 // 配置文件
 // file: config.go
-type config_list struct {
-	Go_version string `json:"go_version"`
-	Os         string `json:"os"`
-	Arch       string `json:"arch"`
-	Version    string `json:"version"`
+type configList struct {
+	GoVersion string `json:"go_version"`
+	Os        string `json:"os"`
+	Arch      string `json:"arch"`
+	Version   string `json:"version"`
 }
 
-var config = config_list{runtime.Version()[2:], runtime.GOOS, runtime.GOARCH, "0.1"}
+var config = configList{runtime.Version()[2:], runtime.GOOS, runtime.GOARCH, "0.1"}
 
 //按照命令处理 info
 //file:info_handler.go
 
 //TODO: 失败返回状态码
-func info_handler(url string, w http.ResponseWriter) bool {
+func infoHandler(url string, w http.ResponseWriter) bool {
 
 	if url == "/info" {
 		msg, _ := json.Marshal(config)
@@ -86,7 +86,7 @@ func info_handler(url string, w http.ResponseWriter) bool {
 //file:view_handler.go
 
 //TODO: 失败返回状态码
-func view_handler(url string, w http.ResponseWriter) bool {
+func viewHandler(url string, w http.ResponseWriter) bool {
 	fmt.Println(url)
 	return true
 }
@@ -95,11 +95,11 @@ func view_handler(url string, w http.ResponseWriter) bool {
 //file:upload_handler.go
 
 //TODO: 失败返回状态码
-func upload_handler(url string, w http.ResponseWriter) bool {
+func uploadHandler(url string, w http.ResponseWriter) bool {
 	return true
 }
 
-func setu_handler(w http.ResponseWriter, r *http.Request) {
+func setuHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//重定向判定
@@ -111,10 +111,10 @@ func setu_handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//去除头
-	path := url[len(new):]
+	path := url[len(newUri):]
 
 	//命令判断与处理
-	if !command_judge(path, r.Method, w) {
+	if !commandJudge(path, r.Method, w) {
 		return
 	}
 
@@ -124,7 +124,7 @@ func setu_handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	serveMux := http.NewServeMux()
-	serveMux.HandleFunc("/", setu_handler)
+	serveMux.HandleFunc("/", setuHandler)
 
 	err := http.ListenAndServe("127.0.0.1:9000", serveMux)
 	if err != nil {
