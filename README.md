@@ -21,6 +21,16 @@ Setu服务器端v0.1
 
 - [ ] **GET** `/info` --> *JSON*
   - 返回当前服务端版本，其他信息（后续补充
+- [ ] **GET** `/view?range=$range&sort=$sort` --> *JSON*
+  - 返回所有可查看的图片ID，以JSON列表的格式
+  - `$range` 
+    - '' --> All pictures
+    - ':10' --> Pic [0, 1, ..., 9]
+    - '10:' --> Pic [10, 11, ..., end]
+    - '10:20' --> Pic [10, 11, ..., 19]
+  - `$sort`
+    - '', 'D' --> 时间新的在前
+    - 'A' --> 时间旧的在前
 - [ ] **GET** `/view/$id` --> *JPEG/PNG/GIF*
   - 返回id为$id的图片
 - [ ] **GET** `/view/$id/status` --> *JSON*
