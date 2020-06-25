@@ -10,7 +10,7 @@ import (
 //file:info_handler.go
 
 //TODO: 失败返回状态码
-func info_handler(url string, w http.ResponseWriter) bool {
+func infoHandler(url string, w http.ResponseWriter) bool {
 
 	if url == "/info" {
 		msg, _ := json.Marshal(config)

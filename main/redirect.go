@@ -7,14 +7,14 @@ import (
 // 重定向
 // file:redirect.go
 
-var old = "/setu/latest"
-var new = "/setu/v" + config.Version
+var oldUri = "/setu/latest"
+var newUri = "/setu/v" + config.Version
 
 func redirect(url string) string {
-	if strings.Index(url, old) == 0 {
-		return strings.Replace(url, old, new, 1)
+	if strings.Index(url, oldUri) == 0 {
+		return strings.Replace(url, oldUri, newUri, 1)
 	}
-	if strings.Index(url, new) == 0 {
+	if strings.Index(url, newUri) == 0 {
 		return url
 	}
 	return ""

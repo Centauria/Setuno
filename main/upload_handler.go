@@ -6,6 +6,6 @@ import "net/http"
 //file:upload_handler.go
 
 //TODO: 失败返回状态码
-func upload_handler(url string, w http.ResponseWriter) bool {
+func uploadHandler(url string, w http.ResponseWriter) bool {
 	return true
 }

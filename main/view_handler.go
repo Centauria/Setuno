@@ -9,7 +9,7 @@ import (
 //file:view_handler.go
 
 //TODO: 失败返回状态码
-func view_handler(url string, w http.ResponseWriter) bool {
+func viewHandler(url string, w http.ResponseWriter) bool {
 	fmt.Println(url)
 	return true
 }
