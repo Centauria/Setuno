@@ -79,23 +79,6 @@ func insertOneMonge(s1 setuImage, collection *mongo.Collection, insertOneOptions
 	return nil
 }
 
-//统计数量
-func countId(collection *mongo.Collection) int {
-	findOptions := options.Find()
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	cur, err := collection.Find(ctx, bson.D{{}}, findOptions)
-	if err != nil {
-		return 0
-	}
-	defer cur.Close(ctx)
-	var i = 0
-	for cur.Next(ctx) {
-		i = i + 1
-	}
-
-	return i
-}
-
 //检测给定MD5是否存在于数据库
 func isExistMd5(md5 string, collection *mongo.Collection) bool {
 	findOneFilter := bson.D{{"md5", md5}}
@@ -121,4 +104,76 @@ func findById(id string, collection *mongo.Collection) (*setuImage, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+//统计数量
+func countNum(collection *mongo.Collection) int {
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	num, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return 0
+	}
+	return int(num)
+}
+
+//顺序返回某个范围内的_id
+func findIdByRangeA(indexMin int, indexMax int, collection *mongo.Collection) ([]string, error) {
+
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(indexMax))
+	findOptions.SetProjection(bson.D{{"_id", 1}})
+	cur, err := collection.Find(ctx, bson.D{{}}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	var result setuImage
+	defer cur.Close(ctx)
+	for index := 0; cur.Next(ctx); index++ {
+		if index >= indexMin {
+			err = cur.Decode(&result)
+			if err != nil {
+				return ids, err
+			}
+			ids = append(ids, result.Id.Hex())
+		}
+	}
+	return ids, nil
+}
+
+//逆序返回某个范围内的_id
+func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([]string, error) {
+
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	num := countNum(collection)
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(num - indexMin))
+	findOptions.SetProjection(bson.D{{"_id", 1}})
+	cur, err := collection.Find(ctx, bson.D{{}}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	var result setuImage
+	defer cur.Close(ctx)
+	for index := 0; cur.Next(ctx); index++ {
+		if index >= num-indexMax {
+			err = cur.Decode(&result)
+			if err != nil {
+				return ids, err
+			}
+			ids = append(ids, result.Id.Hex())
+		}
+	}
+	for i, j := 0, indexMax-indexMin-1; i < j; i, j = i+1, j-1 {
+		ids[i], ids[j] = ids[j], ids[i]
+	}
+
+	return ids, nil
+
 }

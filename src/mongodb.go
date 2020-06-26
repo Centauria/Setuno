@@ -26,6 +26,7 @@ func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo
 	newPath, err := mvFile(oldpath, imageMd5S, imageTime, ex)
 	if newPath == "" {
 		//同名去重
+		fmt.Println(err)
 		return false
 	}
 
