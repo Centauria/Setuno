@@ -1,0 +1,9 @@
+{
+  "mongodb": {
+    "host": "jinfans.top",
+    "port": 27017,
+    "user": "bot",
+    "pass": "bot",
+    "db": "bot"
+  }
+}
