@@ -121,7 +121,8 @@ func findIdByRangeA(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	findOptions := options.Find()
-	findOptions.SetLimit(int64(indexMax))
+	findOptions.SetSkip(int64(indexMin))
+	findOptions.SetLimit(int64(indexMax - indexMin))
 	findOptions.SetProjection(bson.D{{"_id", 1}})
 	cur, err := collection.Find(ctx, bson.D{{}}, findOptions)
 	if err != nil {
@@ -132,14 +133,12 @@ func findIdByRangeA(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	var result setuImage
 	defer cur.Close(ctx)
-	for index := 0; cur.Next(ctx); index++ {
-		if index >= indexMin {
-			err = cur.Decode(&result)
-			if err != nil {
-				return ids, err
-			}
-			ids = append(ids, result.Id.Hex())
+	for cur.Next(ctx) {
+		err = cur.Decode(&result)
+		if err != nil {
+			return ids, err
 		}
+		ids = append(ids, result.Id.Hex())
 	}
 	return ids, nil
 }
@@ -150,7 +149,8 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	num := countNum(collection)
 	findOptions := options.Find()
-	findOptions.SetLimit(int64(num - indexMin))
+	findOptions.SetSkip(int64(num - indexMax))
+	findOptions.SetLimit(int64(indexMax - indexMin))
 	findOptions.SetProjection(bson.D{{"_id", 1}})
 	cur, err := collection.Find(ctx, bson.D{{}}, findOptions)
 	if err != nil {
@@ -161,14 +161,12 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	var result setuImage
 	defer cur.Close(ctx)
-	for index := 0; cur.Next(ctx); index++ {
-		if index >= num-indexMax {
-			err = cur.Decode(&result)
-			if err != nil {
-				return ids, err
-			}
-			ids = append(ids, result.Id.Hex())
+	for cur.Next(ctx) {
+		err = cur.Decode(&result)
+		if err != nil {
+			return ids, err
 		}
+		ids = append(ids, result.Id.Hex())
 	}
 	for i, j := 0, indexMax-indexMin-1; i < j; i, j = i+1, j-1 {
 		ids[i], ids[j] = ids[j], ids[i]

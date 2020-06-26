@@ -7,9 +7,6 @@ import (
 )
 
 //按照命令处理 info
-//file:info_handler.go
-
-//TODO: 失败返回状态码
 func info_handler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new):]

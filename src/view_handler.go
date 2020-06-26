@@ -13,14 +13,12 @@ import (
 )
 
 //按照命令处理 view
-//file:view_handler.go
-
-//TODO: 失败返回状态码
 func view_handler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new)+len("/view"):]
 
-	if r.URL.String()[len(new):] == "/view" {
+	if r.URL.String()[len(new):] == "/view" || []rune(url)[0] == '?' {
+
 		//查询
 		query := r.URL.Query()
 		ids, err := getIdByGet(query)
@@ -43,43 +41,40 @@ func view_handler(r *http.Request, w http.ResponseWriter) bool {
 
 	if []rune(url)[0] == '/' {
 
-		path, err := getImageById(url[1:])
-		if err != nil {
-			fmt.Println("StatusCode:404, ", err)
-			w.WriteHeader(404)
-			return false
+		com := strings.Split(url[1:], "/")
+
+		if len(com) == 1 || (len(com) == 2 && com[1] == "") {
+			//获得路径
+			path, err := getImageById(com[0])
+			if err != nil {
+				fmt.Println("StatusCode:404, ", err)
+				w.WriteHeader(404)
+				return false
+			}
+
+			//发送图片
+			err = sendImage(path, w)
+			if err != nil {
+				fmt.Println("StatusCode:404, ", err)
+				w.WriteHeader(404)
+				return false
+			}
+
+			return true
 		}
 
-		err = sendImage(path, w)
-		if err != nil {
-			fmt.Println("StatusCode:404, ", err)
-			w.WriteHeader(404)
-			return false
+		if len(com) == 2 && com[1] == "status" {
+			statusJson, err := getImageStatusById(com[0])
+			if err != nil {
+				fmt.Println("StatusCode:404, ", err)
+				w.WriteHeader(404)
+				return false
+			}
+			fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+			_, _ = w.Write(statusJson)
+			return true
 		}
 
-		return true
-	}
-
-	if []rune(url)[0] == '?' {
-
-		//查询
-		query := r.URL.Query()
-		ids, err := getIdByGet(query)
-		if err != nil {
-			fmt.Println("StatusCode:404, ", err)
-			w.WriteHeader(404)
-			return false
-		}
-
-		//Json化
-		idsJson, err := json.Marshal(ids)
-		if err != nil {
-			fmt.Printf("序列化错误 err=%v\n", err)
-		}
-		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
-		_, _ = w.Write(idsJson)
-
-		return true
 	}
 
 	//404：找不到资源地址
@@ -116,6 +111,40 @@ func getImageById(id string) (string, error) {
 	}
 
 	return path, nil
+}
+
+//根据_id查询单张图片
+func getImageStatusById(id string) ([]byte, error) {
+
+	//连接
+	client, err := connectMongo()
+	if err != nil {
+		return nil, err
+	}
+
+	// 指定获取要操作的数据集
+	collectionLink := "setu_image"
+	collection := client.Database(mongodb_link.db).Collection(collectionLink)
+	fmt.Println("Connected to " + mongodb_link.db + "!")
+
+	//按照_id查询图片地址
+	result, err := findById(id, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	statusJson, err := json.Marshal(result)
+	if err != nil {
+		fmt.Printf("序列化错误 err=%v\n", err)
+	}
+
+	//断开连接
+	err = disconnectMongo(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return statusJson, nil
 }
 
 //传输图片
@@ -155,7 +184,7 @@ func getIdByGet(query map[string][]string) ([]string, error) {
 	collection := client.Database(mongodb_link.db).Collection(collectionLink)
 	fmt.Println("Connected to " + mongodb_link.db + "!")
 
-	//得到正确qyery
+	//得到正确query
 	indexMin, indexMax, qSort, err := judgeAndFormatQuert(query, collection)
 	if err != nil {
 		return nil, err
