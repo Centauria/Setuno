@@ -86,7 +86,6 @@ func mongodboperation() {
 	fmt.Println("Connected to " + mongodb_link.db + "!")
 
 	// 查询数据
-
 	result := findoneMonge(collection)
 	fmt.Printf("Found a single document: %T\n", result)
 	fmt.Println(result)
