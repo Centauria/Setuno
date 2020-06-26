@@ -13,7 +13,6 @@ import (
 func info_handler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new):]
-	fmt.Println(url)
 
 	if url == "/info" {
 		msg, _ := json.Marshal(config)

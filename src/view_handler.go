@@ -20,6 +20,27 @@ func view_handler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new)+len("/view"):]
 
+	if r.URL.String()[len(new):] == "/view" {
+		//查询
+		query := r.URL.Query()
+		ids, err := getIdByGet(query)
+		if err != nil {
+			fmt.Println("StatusCode:404, ", err)
+			w.WriteHeader(404)
+			return false
+		}
+
+		//Json化
+		idsJson, err := json.Marshal(ids)
+		if err != nil {
+			fmt.Printf("序列化错误 err=%v\n", err)
+		}
+		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+		_, _ = w.Write(idsJson)
+
+		return true
+	}
+
 	if []rune(url)[0] == '/' {
 
 		path, err := getImageById(url[1:])
