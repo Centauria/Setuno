@@ -1,9 +1,12 @@
 package main
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type setuImage struct {
-	Md5       string      `bson:"md5"`
-	Timestamp int         `bson:"timestamp"`
-	Info      []imageInfo `bson:"info"`
+	Id        primitive.ObjectID `bson:"_id"`
+	Md5       string             `bson:"md5"`
+	Timestamp int                `bson:"timestamp"`
+	Info      []imageInfo        `bson:"info"`
 }
 
 type imageInfo struct {

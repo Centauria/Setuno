@@ -4,51 +4,51 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"time"
 )
 
 //连接库
-func connectMongo() *mongo.Client {
+func connectMongo() (*mongo.Client, error) {
 	// 设置客户端连接配置
 	clientOptions := options.Client().ApplyURI("mongodb://" + mongodb_link.user + ":" + mongodb_link.pass + "@" + mongodb_link.host + ":" + mongodb_link.port)
 
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// 检查连接
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	fmt.Println("Connected to MongoDB!")
 
-	return client
+	return client, nil
 }
 
 //断开连接
-func disconnectMongo(client *mongo.Client) {
+func disconnectMongo(client *mongo.Client) error {
 	err := client.Disconnect(context.TODO())
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Println("Connection to MongoDB closed.")
+	return nil
 }
 
 //读单条数据
-func findOneMonge(collection *mongo.Collection, filter interface{}, findOneOptions *options.FindOneOptions) (setuImage, error) {
+func findOneMonge(collection *mongo.Collection, filter interface{}, findOneOptions *options.FindOneOptions) (*setuImage, error) {
 	var result setuImage
 	err := collection.FindOne(context.TODO(), filter, findOneOptions).Decode(&result)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
-	//fmt.Printf("Found a single document: %+v\n", result)
-	return result, nil
+	return &result, nil
 }
 
 //多条数据查找
@@ -57,25 +57,26 @@ func findMonge(collection *mongo.Collection, filter interface{}, findOptions *op
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	cur, err := collection.Find(ctx, filter, findOptions)
 	if err != nil {
-		return results, err
+		return nil, err
 	}
 	defer cur.Close(ctx)
 	err = cur.All(ctx, &results)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	//fmt.Printf("Found  document: %+v\n", results)
-	return results, err
+	return results, nil
 }
 
 //写数据
-func insertOneMonge(s1 setuImage, collection *mongo.Collection, insertOneOptions *options.InsertOneOptions) {
+func insertOneMonge(s1 setuImage, collection *mongo.Collection, insertOneOptions *options.InsertOneOptions) error {
 
+	s1.Id = primitive.NewObjectID()
 	_, err := collection.InsertOne(context.TODO(), s1, insertOneOptions)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
+	return nil
 }
 
 //统计数量
@@ -99,11 +100,25 @@ func countId(collection *mongo.Collection) int {
 func isExistMd5(md5 string, collection *mongo.Collection) bool {
 	findOneFilter := bson.D{{"md5", md5}}
 	findOneOptions := options.FindOne()
-	result, err := findOneMonge(collection, findOneFilter, findOneOptions)
+	_, err := findOneMonge(collection, findOneFilter, findOneOptions)
 	if err != nil {
 		return false
 	}
 
-	fmt.Println(result)
 	return true
+}
+
+//根据_id查询数据
+func findById(id string, collection *mongo.Collection) (*setuImage, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	findOneFilter := bson.D{{"_id", objectId}}
+	findOneOptions := options.FindOne()
+	result, err := findOneMonge(collection, findOneFilter, findOneOptions)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

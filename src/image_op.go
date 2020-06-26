@@ -30,7 +30,7 @@ func getEx(path string) string {
 }
 
 //移动文件到新目录，返回新目录
-func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) string {
+func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) (string, error) {
 
 	//获得MD5、时间、后缀
 	imageMd5 := []rune(imageMd5S)
@@ -41,7 +41,7 @@ func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) s
 	second := strconv.FormatInt(int64(imageTime.Second()), 10)
 
 	// 根据文件名判断目录是否存在，若不存在，创建目录
-	dirPath := "setu_image/" + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
+	dirPath := "/home/udf/bot_setu_image/" + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
 		string(imageMd5[2]) + "/" + string(imageMd5[3]) + "/"
 
 	_, err := os.Stat(dirPath)
@@ -57,11 +57,41 @@ func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) s
 	_, err = os.Stat(newPath)
 	if err == nil || os.IsExist(err) {
 		//目录存在，返回空
-		return ""
+		return "", err
 	}
 
 	// 将图片剪贴到目录下
-	os.Rename(filePath, newPath)
+	err = os.Rename(filePath, newPath)
+	if err != nil {
+		return "nil", err
+	}
+
+	return newPath, nil
+}
+
+//根据记录组织url
+func getUrlByResult(result *setuImage) string {
+
+	//时间戳转为时间
+	imageTime := time.Unix(int64(result.Timestamp), 0)
+	year := strconv.FormatInt(int64(imageTime.Year()), 10)
+	month := strconv.FormatInt(int64(imageTime.Month()), 10)
+	day := strconv.FormatInt(int64(imageTime.Day()), 10)
+	minute := strconv.FormatInt(int64(imageTime.Minute()), 10)
+	second := strconv.FormatInt(int64(imageTime.Second()), 10)
+
+	//MD5
+	imageMd5S := result.Md5
+	imageMd5 := []rune(imageMd5S)
+
+	//ex
+	ex := result.Info[0].Content
+
+	dirPath := "/home/udf/bot_setu_image/" + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
+		string(imageMd5[2]) + "/" + string(imageMd5[3]) + "/"
+	fileName := imageMd5S[4:8] + day + minute + second + "." + ex
+	newPath := dirPath + fileName
 
 	return newPath
+
 }
