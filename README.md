@@ -19,7 +19,7 @@ Setu服务器端v0.1
 
 以下所有HTTP请求格式，均省略前面的`/setu/v0.1/`
 
-- [ ] **GET** `/info` --> *JSON*
+- [x] **GET** `/info` --> *JSON*
   - 返回当前服务端版本，其他信息（后续补充
 - [ ] **GET** `/view?range=$range&sort=$sort` --> *JSON*
   - 返回所有可查看的图片ID，以JSON列表的格式
@@ -94,6 +94,3 @@ Setu服务器端v0.1
 - 409 (Conflict) 通用冲突
 - 500 (Internal Server Error) 通用服务器错误
 - 503 (Service Unavailable) 服务端当前无法处理请求
-
-
-
