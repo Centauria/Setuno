@@ -12,3 +12,13 @@ type config_list struct {
 }
 
 var config = config_list{runtime.Version()[2:], runtime.GOOS, runtime.GOARCH, "0.1"}
+
+type mongodb struct {
+	host string
+	port string
+	user string
+	pass string
+	db   string
+}
+
+var mongodb_link = mongodb{"jinfans.top", "27017", "bot", "bot", "bot"}

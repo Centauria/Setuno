@@ -12,7 +12,7 @@ import (
 type command struct {
 	url     string
 	method  string
-	handler func(string, http.ResponseWriter) bool
+	handler func(*http.Request, http.ResponseWriter) bool
 }
 
 var command_list = []command{
@@ -21,10 +21,12 @@ var command_list = []command{
 	command{"/upload", "POST", upload_handler},
 }
 
-func command_judge(url string, method string, w http.ResponseWriter) bool {
+func command_judge(r *http.Request, w http.ResponseWriter) bool {
+	url := r.URL.Path[len(new):]
+	method := r.Method
 	for _, c := range command_list {
 		if method == c.method && strings.Index(url, c.url) == 0 {
-			if !c.handler(url, w) {
+			if !c.handler(r, w) {
 				return false
 			}
 			return true

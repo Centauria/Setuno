@@ -10,12 +10,15 @@ import (
 //file:info_handler.go
 
 //TODO: 失败返回状态码
-func info_handler(url string, w http.ResponseWriter) bool {
+func info_handler(r *http.Request, w http.ResponseWriter) bool {
+
+	url := r.URL.String()[len(new):]
+	fmt.Println(url)
 
 	if url == "/info" {
 		msg, _ := json.Marshal(config)
 		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
-		w.Write(msg)
+		_, _ = w.Write(msg)
 		return true
 	}
 

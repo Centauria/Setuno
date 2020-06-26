@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"strings"
 )
 
@@ -10,12 +11,13 @@ import (
 var old = "/setu/latest"
 var new = "/setu/v" + config.Version
 
-func redirect(url string) string {
-	if strings.Index(url, old) == 0 {
-		return strings.Replace(url, old, new, 1)
+func redirect(r *http.Request) bool {
+	if r.URL.Path[:len(old)] == old && (len(old) == len(r.URL.Path) || []rune(r.URL.Path)[len(old)] == '/') {
+		r.URL.Path = strings.Replace(r.URL.Path, old, new, 1)
+		return true
 	}
-	if strings.Index(url, new) == 0 {
-		return url
+	if r.URL.Path[:len(new)] == new && (len(new) == len(r.URL.Path) || []rune(r.URL.Path)[len(old)] == '/') {
+		return true
 	}
-	return ""
+	return false
 }
