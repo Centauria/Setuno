@@ -28,7 +28,7 @@ func setu_handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	mongodboperation()
+	//mongodboperation()
 	//mongotest()
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/", setu_handler)

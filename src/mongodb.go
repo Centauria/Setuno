@@ -1,77 +1,45 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"time"
 )
 
-type setuImage struct {
-	Id        int         `bson:"id"`
-	Md5       string      `bson:"md5"`
-	Timestamp int         `bson:"timestamp"`
-	Info      []imageInfo `bson:"info"`
-}
+//将图片从原地址转移到新地址，插入数据库
+func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo.Collection) bool {
 
-type imageInfo struct {
-	Name    string `bson:"name"`
-	Content string `bson:"content"`
-}
+	//获取MD5，时间，后缀
+	imageMd5S := getMd5(oldpath)
+	imageTime := time.Now()
+	ex := getEx(oldpath)
 
-//连接库
-func connectMongo() *mongo.Client {
-	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://" + mongodb_link.user + ":" + mongodb_link.pass + "@" + mongodb_link.host + ":" + mongodb_link.port)
-
-	// 连接到MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
+	//MD5去重
+	if isExistMd5(imageMd5S, collection) {
+		fmt.Println("md5:" + imageMd5S + "已存在")
+		return false
 	}
 
-	// 检查连接
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Connected to MongoDB!")
-
-	return client
-}
-
-//断开连接
-func disconnectMongo(client *mongo.Client) {
-	err := client.Disconnect(context.TODO())
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Connection to MongoDB closed.")
-}
-
-//读数据
-func findoneMonge(collection *mongo.Collection) setuImage {
-	var result setuImage
-	filter := bson.D{{}}
-	err := collection.FindOne(context.TODO(), filter).Decode(&result)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Found a single document: %+v\n", result)
-	return result
-}
-
-//写数据
-func insertoneMonge(s1 setuImage, collection *mongo.Collection) {
-
-	insertResult, err := collection.InsertOne(context.TODO(), s1)
-	if err != nil {
-		log.Fatal(err)
+	//移动文件
+	newPath := mvFile(oldpath, imageMd5S, imageTime, ex)
+	if newPath == "" {
+		//同名去重
+		return false
 	}
 
-	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+	//插入数据库
+	var setu setuImage
+	setu.Md5 = imageMd5S
+	setu.Timestamp = int(imageTime.Unix())
+	setu.Info = []imageInfo{{"ex", ex}, {"type", imageLibrary}}
+	insertOneOptions := options.InsertOne()
+	insertOneMonge(setu, collection, insertOneOptions)
+	fmt.Println(oldpath, newPath)
+
+	return true
 }
 
 //操作库
@@ -81,35 +49,33 @@ func mongodboperation() {
 	client := connectMongo()
 
 	// 指定获取要操作的数据集
-	collection_link := "setu_image"
-	collection := client.Database(mongodb_link.db).Collection(collection_link)
+	collectionLink := "setu_image"
+	collection := client.Database(mongodb_link.db).Collection(collectionLink)
 	fmt.Println("Connected to " + mongodb_link.db + "!")
 
 	// 查询数据
-	result := findoneMonge(collection)
+	findOneFilter := bson.D{{}}
+	findOneOptions := options.FindOne()
+	result, err := findOneMonge(collection, findOneFilter, findOneOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("Found a single document: %T\n", result)
-	fmt.Println(result)
-	/*
-		//写入数据
-		result.Id = 2
-		insertoneMonge(result, collection)
 
-	*/
+	//写入数据
+	result.Timestamp = int(time.Now().Unix())
+	insertOneOptions := options.InsertOne()
+	insertOneMonge(result, collection, insertOneOptions)
+
 	/*
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		cur, err := collection.Find(ctx, bson.D{})
-		if err != nil { log.Fatal(err) }
-		defer cur.Close(ctx)
-		for cur.Next(ctx) {
-			var result bson.M
-			err := cur.Decode(&result)
-			if err != nil { log.Fatal(err) }
-			// do something with result....
-			fmt.Println(result)
-		}
-		if err := cur.Err(); err != nil {
-			log.Fatal(err)
-		}*/
+		//差人多条数据
+		findFilter :=bson.D{{}}
+		findOptions := options.Find()
+		findOptions.SetSort(bson.D{{"id", -1}})
+		findOptions.SetLimit(1)
+		results := findMonge(collection, findFilter, findOptions)
+		fmt.Println(results)
+	*/
 
 	//断开连接
 	disconnectMongo(client)
