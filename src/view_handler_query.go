@@ -26,6 +26,9 @@ func getIdByGet(query map[string][]string) ([]string, error) {
 	//得到正确query
 	indexMin, indexMax, qSort, err := judgeAndFormatQuert(query, collection)
 	if err != nil {
+		if indexMin == 0 && indexMax == 0 && qSort == "" {
+			return []string{}, err
+		}
 		return nil, err
 	}
 
@@ -90,7 +93,7 @@ func judgeAndFormatQuert(query map[string][]string, collection *mongo.Collection
 
 	//合法性验证
 	if indexMin < 0 || indexMax > num || indexMin >= indexMax {
-		return -2, -2, "", errors.New("错误的参数：range")
+		return 0, 0, "", errors.New("错误的参数：range")
 	}
 	if qSort != "" && qSort != "D" && qSort != "A" {
 		return -2, -2, "", errors.New("错误的参数：sort")

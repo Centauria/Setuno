@@ -59,7 +59,7 @@ func countHandlerQuery(url string, r *http.Request, w http.ResponseWriter) bool 
 	if qType == "" {
 		imageNumber.Number = countNum(collection, bson.D{{}})
 	} else {
-		imageNumber.Number = countNum(collection, bson.D{{"info.content", qType}})
+		imageNumber.Number = countNum(collection, bson.D{{"info.legacy_label", qType}})
 	}
 
 	//断开连接

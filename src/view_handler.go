@@ -55,6 +55,14 @@ func viewHandlerQuery(url string, r *http.Request, w http.ResponseWriter) bool {
 	query := r.URL.Query()
 	ids, err := getIdByGet(query)
 	if err != nil {
+		if ids != nil {
+			idsJson, err := json.Marshal(ids)
+			if err != nil {
+				fmt.Printf("序列化错误 err=%v\n", err)
+			}
+			_, _ = w.Write(idsJson)
+			return false
+		}
 		fmt.Println("StatusCode:404, ", err)
 		w.WriteHeader(404)
 		return false

@@ -9,7 +9,7 @@ import (
 )
 
 //将图片从原地址转移到新地址，插入数据库
-func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo.Collection) bool {
+func imageInsertAndRemove(oldpath string, legacyLabel string, collection *mongo.Collection) bool {
 
 	//获取MD5，去重
 	imageMd5S := getMd5(oldpath)
@@ -20,10 +20,10 @@ func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo
 
 	//获取MD5，时间，后缀
 	imageTime := time.Now()
-	ex := getEx(oldpath)
+	ext := getExt(oldpath)
 
 	//移动文件
-	newPath, err := mvFile(oldpath, imageMd5S, imageTime, ex)
+	newPath, err := mvFile(oldpath, imageMd5S, imageTime, ext)
 	if newPath == "" {
 		//同名去重
 		fmt.Println(err)
@@ -31,10 +31,14 @@ func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo
 	}
 
 	//插入数据库
-	var setu setuImage
-	setu.Md5 = imageMd5S
-	setu.Timestamp = int(imageTime.Unix())
-	setu.Info = []imageInfo{{"ex", ex}, {"type", imageLibrary}}
+	setu := make(bson.M)
+	setu["md5"] = imageMd5S
+	setu["timestamp"] = int(imageTime.Unix())
+	setu["ext"] = ext
+	info := make(bson.M)
+	info["legacy_label"] = legacyLabel
+	info["dim"] = "2"
+	setu["info"] = info
 	insertOneOptions := options.InsertOne()
 	err = insertOneMonge(setu, collection, insertOneOptions)
 	if err != nil {

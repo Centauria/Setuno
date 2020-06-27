@@ -43,18 +43,18 @@ func disconnectMongo(client *mongo.Client) error {
 }
 
 //读单条数据
-func findOneMonge(collection *mongo.Collection, filter interface{}, findOneOptions *options.FindOneOptions) (*setuImage, error) {
-	var result setuImage
+func findOneMonge(collection *mongo.Collection, filter interface{}, findOneOptions *options.FindOneOptions) (bson.M, error) {
+	var result bson.M
 	err := collection.FindOne(context.TODO(), filter, findOneOptions).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
 //多条数据查找
-func findMonge(collection *mongo.Collection, filter interface{}, findOptions *options.FindOptions) ([]setuImage, error) {
-	var results []setuImage
+func findMonge(collection *mongo.Collection, filter interface{}, findOptions *options.FindOptions) ([]bson.M, error) {
+	var results []bson.M
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	cur, err := collection.Find(ctx, filter, findOptions)
 	if err != nil {
@@ -70,9 +70,9 @@ func findMonge(collection *mongo.Collection, filter interface{}, findOptions *op
 }
 
 //写数据
-func insertOneMonge(s1 setuImage, collection *mongo.Collection, insertOneOptions *options.InsertOneOptions) error {
+func insertOneMonge(s1 bson.M, collection *mongo.Collection, insertOneOptions *options.InsertOneOptions) error {
 
-	s1.Id = primitive.NewObjectID()
+	s1["_id"] = primitive.NewObjectID()
 	_, err := collection.InsertOne(context.TODO(), s1, insertOneOptions)
 	if err != nil {
 		return err
@@ -93,14 +93,15 @@ func isExistMd5(md5 string, collection *mongo.Collection) bool {
 }
 
 //根据_id查询数据
-func findById(id string, collection *mongo.Collection) (*setuImage, error) {
+func findById(id string, collection *mongo.Collection) (bson.M, error) {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
+	var result bson.M
 	findOneFilter := bson.D{{"_id", objectId}}
 	findOneOptions := options.FindOne()
-	result, err := findOneMonge(collection, findOneFilter, findOneOptions)
+	result, err = findOneMonge(collection, findOneFilter, findOneOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -132,14 +133,15 @@ func findIdByRangeA(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	var ids []string
 
-	var result setuImage
+	result := make(bson.M)
+	result["_id"], _ = primitive.ObjectIDFromHex("")
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
 		err = cur.Decode(&result)
 		if err != nil {
 			return ids, err
 		}
-		ids = append(ids, result.Id.Hex())
+		ids = append(ids, result["_id"].(primitive.ObjectID).Hex())
 	}
 	return ids, nil
 }
@@ -160,14 +162,14 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	var ids []string
 
-	var result setuImage
+	result := make(bson.M)
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
 		err = cur.Decode(&result)
 		if err != nil {
 			return ids, err
 		}
-		ids = append(ids, result.Id.Hex())
+		ids = append(ids, result["_id"].(primitive.ObjectID).Hex())
 	}
 	for i, j := 0, indexMax-indexMin-1; i < j; i, j = i+1, j-1 {
 		ids[i], ids[j] = ids[j], ids[i]
@@ -178,8 +180,8 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 }
 
 //获得第skipNum条数据
-func findSkipNum(skipNum int, qType string, collection *mongo.Collection) (*setuImage, error) {
-	findOneFilter := bson.D{{"info.content", qType}}
+func findSkipNum(skipNum int, qType string, collection *mongo.Collection) (bson.M, error) {
+	findOneFilter := bson.D{{"info.legacy_label", qType}}
 	if qType == "" {
 		findOneFilter = bson.D{}
 	}

@@ -96,7 +96,7 @@ func getImageRandom(qType string) (string, error) {
 	if qType == "" {
 		num = countNum(collection, bson.D{{}})
 	} else {
-		num = countNum(collection, bson.D{{"info.content", qType}})
+		num = countNum(collection, bson.D{{"info.legacy_label", qType}})
 	}
 
 	if num == 0 {

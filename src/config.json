@@ -7,7 +7,7 @@
     "go_version": "",
     "os": "",
     "arch": "",
-    "version": "0.1"
+    "version": "0.2"
   },
   "mongodb": {
     "host": "jinfans.top",
