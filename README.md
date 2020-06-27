@@ -21,7 +21,7 @@ Setu服务器端v0.1
 
 - [x] **GET** `/info` --> *JSON*
   - 返回当前服务端版本，其他信息（后续补充
-- [ ] **GET** `/view?range=$range&sort=$sort` --> *JSON*
+- [x] **GET** `/view?range=$range&sort=$sort` --> *JSON*
   - 返回所有可查看的图片ID，以JSON列表的格式
   - `$range` 
     - '' --> All pictures
@@ -31,10 +31,17 @@ Setu服务器端v0.1
   - `$sort`
     - '', 'D' --> 时间新的在前
     - 'A' --> 时间旧的在前
-- [ ] **GET** `/view/$id` --> *JPEG/PNG/GIF*
+- [ ] **GET** `/view/direct/$id` --> *JPEG/PNG/GIF*
   - 返回id为$id的图片
-- [ ] **GET** `/view/$id/status` --> *JSON*
+- [ ] **GET** `/view/status/$id` --> *JSON*
   - 返回$id图片信息
+- [ ] **GET** `/view/random?type=$type` --> *JPEG/PNG/GIF*
+  - 返回随机id对应的setu
+  - `$type`
+    - '' --> Choose from all
+    - 'name' --> Choose from type=='name'
+- [ ] **GET** `/count` --> *JSON*
+  - 返回当前库中setu总数
 - [ ] **POST** `/upload`
   - 上传图片及其信息
 
