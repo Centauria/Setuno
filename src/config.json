@@ -1,9 +1,24 @@
 {
+  "program": {
+    "host": "127.0.0.1",
+    "port": 9000
+  },
+  "info": {
+    "go_version": "",
+    "os": "",
+    "arch": "",
+    "version": "0.1"
+  },
   "mongodb": {
     "host": "jinfans.top",
     "port": 27017,
     "user": "bot",
     "pass": "bot",
-    "db": "bot"
+    "db": "bot",
+    "collection": "setu_image"
+  },
+  "path": {
+    "image_path": "/home/udf/bot_setu_image/",
+    "temp_path": "/home/udf/bot_setu_image/temp/"
   }
 }

@@ -41,7 +41,7 @@ func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) (
 	second := strconv.FormatInt(int64(imageTime.Second()), 10)
 
 	// 根据文件名判断目录是否存在，若不存在，创建目录
-	dirPath := "/home/udf/bot_setu_image/" + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
+	dirPath := conf.Path.ImagePath + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
 		string(imageMd5[2]) + "/" + string(imageMd5[3]) + "/"
 
 	_, err := os.Stat(dirPath)
@@ -87,7 +87,7 @@ func getUrlByResult(result *setuImage) string {
 	//ex
 	ex := result.Info[0].Content
 
-	dirPath := "/home/udf/bot_setu_image/" + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
+	dirPath := conf.Path.ImagePath + year + "/" + month + "/" + string(imageMd5[0]) + "/" + string(imageMd5[1]) + "/" +
 		string(imageMd5[2]) + "/" + string(imageMd5[3]) + "/"
 	fileName := imageMd5S[4:8] + day + minute + second + "." + ex
 	newPath := dirPath + fileName

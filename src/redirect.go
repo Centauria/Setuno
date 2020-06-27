@@ -9,7 +9,7 @@ import (
 // file:redirect.go
 
 var old = "/setu/latest"
-var new = "/setu/v" + config.Version
+var new = "/setu/v" + conf.Info.Version
 
 func redirect(r *http.Request) bool {
 	if r.URL.Path[:len(old)] == old && (len(old) == len(r.URL.Path) || []rune(r.URL.Path)[len(old)] == '/') {

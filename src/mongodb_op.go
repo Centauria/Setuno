@@ -7,13 +7,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"strconv"
 	"time"
 )
 
 //连接库
 func connectMongo() (*mongo.Client, error) {
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://" + mongodbLink.user + ":" + mongodbLink.pass + "@" + mongodbLink.host + ":" + mongodbLink.port)
+	clientOptions := options.Client().ApplyURI("mongodb://" + conf.Mongodb.User + ":" + conf.Mongodb.Pass + "@" + conf.Mongodb.Host + ":" + strconv.Itoa(conf.Mongodb.Port))
 
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)

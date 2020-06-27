@@ -93,9 +93,9 @@ func getImageById(id string) (string, error) {
 	}
 
 	// 指定获取要操作的数据集
-	collectionLink := "setu_image"
-	collection := client.Database(mongodbLink.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodbLink.db + "!")
+	collectionLink := conf.Mongodb.Collection
+	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
+	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
 
 	//按照_id查询图片地址
 	result, err := findById(id, collection)
@@ -123,9 +123,9 @@ func getImageStatusById(id string) ([]byte, error) {
 	}
 
 	// 指定获取要操作的数据集
-	collectionLink := "setu_image"
-	collection := client.Database(mongodbLink.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodbLink.db + "!")
+	collectionLink := conf.Mongodb.Collection
+	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
+	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
 
 	//按照_id查询图片地址
 	result, err := findById(id, collection)
@@ -180,9 +180,9 @@ func getIdByGet(query map[string][]string) ([]string, error) {
 	}
 
 	// 指定获取要操作的数据集
-	collectionLink := "setu_image"
-	collection := client.Database(mongodbLink.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodbLink.db + "!")
+	collectionLink := conf.Mongodb.Collection
+	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
+	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
 
 	//得到正确query
 	indexMin, indexMax, qSort, err := judgeAndFormatQuert(query, collection)

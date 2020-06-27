@@ -12,7 +12,7 @@ func infoHandler(r *http.Request, w http.ResponseWriter) bool {
 	url := r.URL.String()[len(new):]
 
 	if url == "/info" {
-		msg, _ := json.Marshal(config)
+		msg, _ := json.Marshal(conf.Info)
 		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
 		_, _ = w.Write(msg)
 		return true

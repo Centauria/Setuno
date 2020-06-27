@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func setuHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,12 +28,17 @@ func setuHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	initConf()
+	err := initConf("src/config.json")
+	if err != nil {
+		fmt.Println("未找到配置文件  ", err)
+		return
+	}
 
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/", setuHandler)
 
-	err := http.ListenAndServe("127.0.0.1:9000", serveMux)
+	url := conf.Program.Host + ":" + strconv.Itoa(conf.Program.Port)
+	err = http.ListenAndServe(url, serveMux)
 	if err != nil {
 		fmt.Printf("http.ListenAndServe()函数执行错误,错误为:%v\n", err)
 		return
