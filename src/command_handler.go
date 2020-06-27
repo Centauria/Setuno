@@ -19,6 +19,7 @@ var commandList = []command{
 	{"/info", "GET", infoHandler},
 	{"/view", "GET", viewHandler},
 	{"/upload", "POST", uploadHandler},
+	{"/count", "GET", countHandler},
 }
 
 func commandJudge(r *http.Request, w http.ResponseWriter) bool {
