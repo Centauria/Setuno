@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"io/ioutil"
@@ -97,6 +98,11 @@ func getImageRandom(qType string) (string, error) {
 	} else {
 		num = countNum(collection, bson.D{{"info.content", qType}})
 	}
+
+	if num == 0 {
+		return "TypeWrong", errors.New("No image found in type : " + qType)
+	}
+
 	skipNum := rand.Intn(num)
 
 	//搜索图片

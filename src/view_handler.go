@@ -120,8 +120,13 @@ func viewHandlerRandom(url string, r *http.Request, w http.ResponseWriter) bool 
 	//获取随即图片路径
 	path, err := getImageRandom(qType)
 	if err != nil {
-		fmt.Println("StatusCode:404, ", err)
-		w.WriteHeader(404)
+		if path == "TypeWrong" {
+			fmt.Println("StatusCode:204, ", err)
+			w.WriteHeader(204)
+		} else {
+			fmt.Println("StatusCode:404, ", err)
+			w.WriteHeader(404)
+		}
 		return false
 	}
 
