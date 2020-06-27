@@ -2,13 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"strconv"
 	"strings"
 )
 
@@ -19,60 +14,32 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 
 	if r.URL.String()[len(new):] == "/view" || []rune(url)[0] == '?' {
 
-		//查询
-		query := r.URL.Query()
-		ids, err := getIdByGet(query)
-		if err != nil {
-			fmt.Println("StatusCode:404, ", err)
-			w.WriteHeader(404)
-			return false
-		}
+		// 命令 /view 的处理
+		return viewHandlerQuery(url, r, w)
 
-		//Json化
-		idsJson, err := json.Marshal(ids)
-		if err != nil {
-			fmt.Printf("序列化错误 err=%v\n", err)
-		}
-		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
-		_, _ = w.Write(idsJson)
-
-		return true
 	}
 
 	if []rune(url)[0] == '/' {
 
 		com := strings.Split(url[1:], "/")
 
-		if len(com) == 1 || (len(com) == 2 && com[1] == "") {
-			//获得路径
-			path, err := getImageById(com[0])
-			if err != nil {
-				fmt.Println("StatusCode:404, ", err)
-				w.WriteHeader(404)
-				return false
-			}
+		fmt.Println(com)
 
-			//发送图片
-			err = sendImage(path, w)
-			if err != nil {
-				fmt.Println("StatusCode:404, ", err)
-				w.WriteHeader(404)
-				return false
-			}
-
-			return true
+		// 命令 /view/direct 的处理
+		if len(com) == 2 && com[0] == "direct" {
+			return viewHandlerDirect(url, com[1], w)
 		}
 
-		if len(com) == 2 && com[1] == "status" {
-			statusJson, err := getImageStatusById(com[0])
-			if err != nil {
-				fmt.Println("StatusCode:404, ", err)
-				w.WriteHeader(404)
-				return false
-			}
-			fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
-			_, _ = w.Write(statusJson)
-			return true
+		// 命令 /view/status 的处理
+		if len(com) == 2 && com[0] == "status" {
+			return viewHandlerStatus(url, com[1], w)
+		}
+
+		// 命令 /view/random 的处理
+		bool1 := len(com) == 1 && com[0][:6] == "random"
+		bool2 := len(com) == 2 && com[1] == ""
+		if bool1 || bool2 {
+			return viewHandlerRandom(url, r, w)
 		}
 
 	}
@@ -83,179 +50,91 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 	return false
 }
 
-//根据_id查询单张图片
-func getImageById(id string) (string, error) {
+// 命令/view? 的处理
+func viewHandlerQuery(url string, r *http.Request, w http.ResponseWriter) bool {
 
-	//连接
-	client, err := connectMongo()
+	//查询
+	query := r.URL.Query()
+	ids, err := getIdByGet(query)
 	if err != nil {
-		return "", err
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
 
-	// 指定获取要操作的数据集
-	collectionLink := conf.Mongodb.Collection
-	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
-	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
-
-	//按照_id查询图片地址
-	result, err := findById(id, collection)
-	if err != nil {
-		return "", err
-	}
-	path := getUrlByResult(result)
-
-	//断开连接
-	err = disconnectMongo(client)
-	if err != nil {
-		return "", err
-	}
-
-	return path, nil
-}
-
-//根据_id查询单张图片
-func getImageStatusById(id string) ([]byte, error) {
-
-	//连接
-	client, err := connectMongo()
-	if err != nil {
-		return nil, err
-	}
-
-	// 指定获取要操作的数据集
-	collectionLink := conf.Mongodb.Collection
-	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
-	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
-
-	//按照_id查询图片地址
-	result, err := findById(id, collection)
-	if err != nil {
-		return nil, err
-	}
-
-	statusJson, err := json.Marshal(result)
+	//Json化
+	idsJson, err := json.Marshal(ids)
 	if err != nil {
 		fmt.Printf("序列化错误 err=%v\n", err)
 	}
+	_, _ = w.Write(idsJson)
+	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
 
-	//断开连接
-	err = disconnectMongo(client)
-	if err != nil {
-		return nil, err
-	}
-
-	return statusJson, nil
+	return true
 }
 
-//传输图片
-func sendImage(path string, w http.ResponseWriter) error {
-
-	file, err := os.Open(path)
+// 命令 /view/direct 的处理
+func viewHandlerDirect(url string, id string, w http.ResponseWriter) bool {
+	//获得路径
+	path, err := getImageById(id)
 	if err != nil {
-		return err
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
 
-	defer file.Close()
-
-	buff, err := ioutil.ReadAll(file)
+	//发送图片
+	err = sendImage(path, w)
 	if err != nil {
-		return err
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
 
-	_, err = w.Write(buff)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+	return true
 }
 
-//根据get参数获取_id
-func getIdByGet(query map[string][]string) ([]string, error) {
-
-	//连接
-	client, err := connectMongo()
+// 命令 /view/status 的处理
+func viewHandlerStatus(url string, id string, w http.ResponseWriter) bool {
+	statusJson, err := getImageStatusById(id)
 	if err != nil {
-		return nil, err
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
-
-	// 指定获取要操作的数据集
-	collectionLink := conf.Mongodb.Collection
-	collection := client.Database(conf.Mongodb.Db).Collection(collectionLink)
-	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
-
-	//得到正确query
-	indexMin, indexMax, qSort, err := judgeAndFormatQuert(query, collection)
-	if err != nil {
-		return nil, err
-	}
-
-	//查找_id
-
-	var ids []string
-	if qSort == "A" {
-		ids, err = findIdByRangeA(indexMin, indexMax, collection)
-		if err != nil {
-			return ids, err
-		}
-	}
-	if qSort == "" || qSort == "D" {
-		ids, err = findIdByRangeD(indexMin, indexMax, collection)
-		if err != nil {
-			return ids, err
-		}
-	}
-
-	return ids, nil
+	_, _ = w.Write(statusJson)
+	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+	return true
 }
 
-//获得正确query
-func judgeAndFormatQuert(query map[string][]string, collection *mongo.Collection) (int, int, string, error) {
+// 命令 /view/random 的处理
+func viewHandlerRandom(url string, r *http.Request, w http.ResponseWriter) bool {
+	query := r.URL.Query()
 
 	//获取query为字符串
-	qRange := ":"
-	if query["range"] != nil {
-		qRangeMap, _ := query["range"]
-		if qRangeMap[0] != "" {
-			qRange = qRangeMap[0]
-		}
-	}
-	qSort := ""
-	if query["sort"] != nil {
-		qSortMap, _ := query["sort"]
-		qSort = qSortMap[0]
+	qType := ""
+	if query["type"] != nil {
+		qTypeMap, _ := query["type"]
+		qType = qTypeMap[0]
 	}
 
-	//判定并格式化
-	if strings.Count(qRange, ":") != 1 {
-		return -2, -2, "", errors.New("错误的参数：range")
-	}
-	index := strings.Index(qRange, ":")
-
-	var num = countNum(collection)
-	var indexMin = 0
-	var indexMax = num
-	var err error
-	if qRange[:index] != "" {
-		indexMin, err = strconv.Atoi(qRange[:index])
-		if err != nil {
-			return -2, -2, "", errors.New("错误的参数：range")
-		}
-	}
-	if qRange[index+1:] != "" {
-		indexMax, err = strconv.Atoi(qRange[index+1:])
-		if err != nil {
-			return -2, -2, "", errors.New("错误的参数：range")
-		}
+	//获取随即图片路径
+	path, err := getImageRandom(qType)
+	if err != nil {
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
 
-	//合法性验证
-	if indexMin < 0 || indexMax > num || indexMin >= indexMax {
-		return -2, -2, "", errors.New("错误的参数：range")
-	}
-	if qSort != "" && qSort != "D" && qSort != "A" {
-		return -2, -2, "", errors.New("错误的参数：sort")
+	//发送图片
+	err = sendImage(path, w)
+	if err != nil {
+		fmt.Println("StatusCode:404, ", err)
+		w.WriteHeader(404)
+		return false
 	}
 
-	return indexMin, indexMax, qSort, nil
+	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+	return true
 }

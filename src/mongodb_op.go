@@ -108,9 +108,9 @@ func findById(id string, collection *mongo.Collection) (*setuImage, error) {
 }
 
 //统计数量
-func countNum(collection *mongo.Collection) int {
+func countNum(collection *mongo.Collection, filter interface{}) int {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	num, err := collection.CountDocuments(ctx, bson.D{})
+	num, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return 0
 	}
@@ -148,7 +148,7 @@ func findIdByRangeA(indexMin int, indexMax int, collection *mongo.Collection) ([
 func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([]string, error) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	num := countNum(collection)
+	num := countNum(collection, bson.D{{}})
 	findOptions := options.Find()
 	findOptions.SetSkip(int64(num - indexMax))
 	findOptions.SetLimit(int64(indexMax - indexMin))
@@ -175,4 +175,16 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 
 	return ids, nil
 
+}
+
+//获得第skipNum条数据
+func findSkipNum(skipNum int, qType string, collection *mongo.Collection) (*setuImage, error) {
+	findOneFilter := bson.D{{"info.content", qType}}
+	findOneOptions := options.FindOne()
+	findOneOptions.SetSkip(int64(skipNum))
+	result, err := findOneMonge(collection, findOneFilter, findOneOptions)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

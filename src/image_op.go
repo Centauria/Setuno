@@ -32,6 +32,7 @@ func getEx(path string) string {
 //移动文件到新目录，返回新目录
 func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) (string, error) {
 
+	//TODO:加上Hour
 	//获得MD5、时间、后缀
 	imageMd5 := []rune(imageMd5S)
 	year := strconv.FormatInt(int64(imageTime.Year()), 10)
@@ -72,6 +73,7 @@ func mvFile(filePath string, imageMd5S string, imageTime time.Time, ex string) (
 //根据记录组织url
 func getUrlByResult(result *setuImage) string {
 
+	//TODO:加上Hour
 	//时间戳转为时间
 	imageTime := time.Unix(int64(result.Timestamp), 0)
 	year := strconv.FormatInt(int64(imageTime.Year()), 10)

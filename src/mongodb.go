@@ -11,16 +11,16 @@ import (
 //将图片从原地址转移到新地址，插入数据库
 func imageInsertAndRemove(oldpath string, imageLibrary string, collection *mongo.Collection) bool {
 
-	//获取MD5，时间，后缀
+	//获取MD5，去重
 	imageMd5S := getMd5(oldpath)
-	imageTime := time.Now()
-	ex := getEx(oldpath)
-
-	//MD5去重
 	if isExistMd5(imageMd5S, collection) {
 		fmt.Println("md5:" + imageMd5S + "已存在")
 		return false
 	}
+
+	//获取MD5，时间，后缀
+	imageTime := time.Now()
+	ex := getEx(oldpath)
 
 	//移动文件
 	newPath, err := mvFile(oldpath, imageMd5S, imageTime, ex)
