@@ -31,17 +31,20 @@ Setu服务器端v0.1
   - `$sort`
     - '', 'D' --> 时间新的在前
     - 'A' --> 时间旧的在前
-- [ ] **GET** `/view/direct/$id` --> *JPEG/PNG/GIF*
+- [x] **GET** `/view/direct/$id` --> *JPEG/PNG/GIF*
   - 返回id为$id的图片
-- [ ] **GET** `/view/status/$id` --> *JSON*
+- [x] **GET** `/view/status/$id` --> *JSON*
   - 返回$id图片信息
-- [ ] **GET** `/view/random?type=$type` --> *JPEG/PNG/GIF*
+- [x] **GET** `/view/random?type=$type` --> *JPEG/PNG/GIF*
   - 返回随机id对应的setu
   - `$type`
     - '' --> Choose from all
     - 'name' --> Choose from type=='name'
-- [ ] **GET** `/count` --> *JSON*
+- [x] **GET** `/count?type=$type` --> *JSON*
   - 返回当前库中setu总数
+  - `$type`
+      - '' --> Count all
+      - 'name' --> Count type=='name'
 - [ ] **POST** `/upload`
   - 上传图片及其信息
 
