@@ -57,8 +57,8 @@ func mongodboperation() error {
 
 	// 指定获取要操作的数据集
 	collectionLink := "setu_image"
-	collection := client.Database(mongodb_link.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodb_link.db + "!")
+	collection := client.Database(mongodbLink.db).Collection(collectionLink)
+	fmt.Println("Connected to " + mongodbLink.db + "!")
 
 	// 查询数据
 	findOneFilter := bson.D{{}}

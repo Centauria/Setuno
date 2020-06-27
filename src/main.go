@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func setu_handler(w http.ResponseWriter, r *http.Request) {
+func setuHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//重定向判定
@@ -19,15 +19,18 @@ func setu_handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//命令判断与处理
-	if !command_judge(r, w) {
+	if !commandJudge(r, w) {
 		return
 	}
 
 }
 
 func main() {
+
+	initConf()
+
 	serveMux := http.NewServeMux()
-	serveMux.HandleFunc("/", setu_handler)
+	serveMux.HandleFunc("/", setuHandler)
 
 	err := http.ListenAndServe("127.0.0.1:9000", serveMux)
 	if err != nil {

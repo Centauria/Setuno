@@ -13,7 +13,7 @@ import (
 )
 
 //按照命令处理 view
-func view_handler(r *http.Request, w http.ResponseWriter) bool {
+func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new)+len("/view"):]
 
@@ -94,8 +94,8 @@ func getImageById(id string) (string, error) {
 
 	// 指定获取要操作的数据集
 	collectionLink := "setu_image"
-	collection := client.Database(mongodb_link.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodb_link.db + "!")
+	collection := client.Database(mongodbLink.db).Collection(collectionLink)
+	fmt.Println("Connected to " + mongodbLink.db + "!")
 
 	//按照_id查询图片地址
 	result, err := findById(id, collection)
@@ -124,8 +124,8 @@ func getImageStatusById(id string) ([]byte, error) {
 
 	// 指定获取要操作的数据集
 	collectionLink := "setu_image"
-	collection := client.Database(mongodb_link.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodb_link.db + "!")
+	collection := client.Database(mongodbLink.db).Collection(collectionLink)
+	fmt.Println("Connected to " + mongodbLink.db + "!")
 
 	//按照_id查询图片地址
 	result, err := findById(id, collection)
@@ -181,8 +181,8 @@ func getIdByGet(query map[string][]string) ([]string, error) {
 
 	// 指定获取要操作的数据集
 	collectionLink := "setu_image"
-	collection := client.Database(mongodb_link.db).Collection(collectionLink)
-	fmt.Println("Connected to " + mongodb_link.db + "!")
+	collection := client.Database(mongodbLink.db).Collection(collectionLink)
+	fmt.Println("Connected to " + mongodbLink.db + "!")
 
 	//得到正确query
 	indexMin, indexMax, qSort, err := judgeAndFormatQuert(query, collection)

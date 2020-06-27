@@ -13,7 +13,7 @@ import (
 //连接库
 func connectMongo() (*mongo.Client, error) {
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://" + mongodb_link.user + ":" + mongodb_link.pass + "@" + mongodb_link.host + ":" + mongodb_link.port)
+	clientOptions := options.Client().ApplyURI("mongodb://" + mongodbLink.user + ":" + mongodbLink.pass + "@" + mongodbLink.host + ":" + mongodbLink.port)
 
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)

@@ -15,16 +15,16 @@ type command struct {
 	handler func(*http.Request, http.ResponseWriter) bool
 }
 
-var command_list = []command{
-	command{"/info", "GET", info_handler},
-	command{"/view", "GET", view_handler},
-	command{"/upload", "POST", upload_handler},
+var commandList = []command{
+	{"/info", "GET", infoHandler},
+	{"/view", "GET", viewHandler},
+	{"/upload", "POST", uploadHandler},
 }
 
-func command_judge(r *http.Request, w http.ResponseWriter) bool {
+func commandJudge(r *http.Request, w http.ResponseWriter) bool {
 	url := r.URL.Path[len(new):]
 	method := r.Method
-	for _, c := range command_list {
+	for _, c := range commandList {
 		if method == c.method && strings.Index(url, c.url) == 0 {
 			if !c.handler(r, w) {
 				return false
