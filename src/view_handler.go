@@ -23,8 +23,6 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 
 		com := strings.Split(url[1:], "/")
 
-		fmt.Println(com)
-
 		// 命令 /view/direct 的处理
 		if len(com) == 2 && com[0] == "direct" {
 			return viewHandlerDirect(url, com[1], w)
@@ -36,7 +34,7 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 		}
 
 		// 命令 /view/random 的处理
-		bool1 := len(com) == 1 && com[0][:6] == "random"
+		bool1 := len(com) == 1 && (com[0] == "random" || (len(com[0]) > 6 && []rune(com[0])[6] == '?'))
 		bool2 := len(com) == 2 && com[1] == ""
 		if bool1 || bool2 {
 			return viewHandlerRandom(url, r, w)
@@ -45,7 +43,7 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 	}
 
 	//404：找不到资源地址
-	fmt.Println("StatusCode:404, Can't find command \"" + url[5:] + "\" in info")
+	fmt.Println("StatusCode:404, Can't find command " + url)
 	w.WriteHeader(404)
 	return false
 }

@@ -180,6 +180,9 @@ func findIdByRangeD(indexMin int, indexMax int, collection *mongo.Collection) ([
 //获得第skipNum条数据
 func findSkipNum(skipNum int, qType string, collection *mongo.Collection) (*setuImage, error) {
 	findOneFilter := bson.D{{"info.content", qType}}
+	if qType == "" {
+		findOneFilter = bson.D{}
+	}
 	findOneOptions := options.FindOne()
 	findOneOptions.SetSkip(int64(skipNum))
 	result, err := findOneMonge(collection, findOneFilter, findOneOptions)

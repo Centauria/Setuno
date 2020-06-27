@@ -90,8 +90,13 @@ func getImageRandom(qType string) (string, error) {
 	fmt.Println("Connected to " + conf.Mongodb.Db + "!")
 
 	//获取图库图片数量
-	num := countNum(collection, bson.D{{"info.content", qType}})
+	var num int
 	rand.Seed(time.Now().UnixNano())
+	if qType == "" {
+		num = countNum(collection, bson.D{{}})
+	} else {
+		num = countNum(collection, bson.D{{"info.content", qType}})
+	}
 	skipNum := rand.Intn(num)
 
 	//搜索图片
