@@ -36,7 +36,7 @@ Setu服务器端v0.1
 - [x] **GET** `/view/status/$id` --> *JSON*
   - 返回$id图片信息
 - [x] **GET** `/view/random?type=$type` --> *JPEG/PNG/GIF*
-  - 返回随机id对应的setu
+  - 返回随机id
   - `$type`
     - '' --> Choose from all
     - 'name' --> Choose from type=='name'

@@ -77,12 +77,12 @@ func getImageStatusById(id string) ([]byte, error) {
 }
 
 //随机获得单张图片
-func getImageRandom(qType string) (string, error) {
+func getImageRandom(qType string) (bson.M, error) {
 
 	//连接
 	client, err := connectMongo()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// 指定获取要操作的数据集
@@ -100,7 +100,7 @@ func getImageRandom(qType string) (string, error) {
 	}
 
 	if num == 0 {
-		return "TypeWrong", errors.New("No image found in type : " + qType)
+		return bson.M{}, errors.New("No image found in type : " + qType)
 	}
 
 	skipNum := rand.Intn(num)
@@ -108,19 +108,16 @@ func getImageRandom(qType string) (string, error) {
 	//搜索图片
 	result, err := findSkipNum(skipNum, qType, collection)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	//获得地址
-	path := getUrlByResult(result)
 
 	//断开连接
 	err = disconnectMongo(client)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return path, nil
+	return result, nil
 }
 
 //传输图片

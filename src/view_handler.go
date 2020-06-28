@@ -3,9 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"strings"
 )
+
+type imageId struct {
+	Id string `json:"_id"`
+}
 
 //按照命令处理 view
 func viewHandler(r *http.Request, w http.ResponseWriter) bool {
@@ -126,9 +131,9 @@ func viewHandlerRandom(url string, r *http.Request, w http.ResponseWriter) bool 
 	}
 
 	//获取随即图片路径
-	path, err := getImageRandom(qType)
+	result, err := getImageRandom(qType)
 	if err != nil {
-		if path == "TypeWrong" {
+		if result != nil {
 			fmt.Println("StatusCode:204, ", err)
 			w.WriteHeader(204)
 		} else {
@@ -138,14 +143,12 @@ func viewHandlerRandom(url string, r *http.Request, w http.ResponseWriter) bool 
 		return false
 	}
 
-	//发送图片
-	err = sendImage(path, w)
-	if err != nil {
-		fmt.Println("StatusCode:404, ", err)
-		w.WriteHeader(404)
-		return false
-	}
-
+	//返回_id
+	var imageIdInfo imageId
+	imageIdInfo.Id = result["_id"].(primitive.ObjectID).Hex()
+	msg, _ := json.Marshal(imageIdInfo)
 	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
+	_, _ = w.Write(msg)
+
 	return true
 }
