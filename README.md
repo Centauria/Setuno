@@ -2,24 +2,24 @@
 
 ## Definition
 
-Setu服务器端v0.1
+Setu服务器端v0.2
 
 ## Function
 
-- [ ] 多线程处理客户端发来的请求（HTTP)
-- [ ] 对每个请求，基于API要求返回数据或对setu数据库进行操作
+- [x] 多线程处理客户端发来的请求（HTTP)
+- [x] 对每个请求，基于API要求返回数据或对setu数据库进行操作
 
 ## API
 
 ### 重定向
 
-- `/setu/latest/(.*)` --> `/setu/v0.1/${0}`
+- `/setu/latest/(.*)` --> `/setu/v0.2/${0}`
 
 ### 基础请求
 
-以下所有HTTP请求格式，均省略前面的`/setu/v0.1/`
+以下所有HTTP请求格式，均省略前面的`/setu/v0.2/`
 
-- [x] **GET** `/info` --> *JSON*
+- [ ] **GET** `/status` --> *JSON*
   - 返回当前服务端版本，其他信息（后续补充
 - [x] **GET** `/view?range=$range&sort=$sort` --> *JSON*
   - 返回所有可查看的图片ID，以JSON列表的格式
@@ -33,7 +33,7 @@ Setu服务器端v0.1
     - 'A' --> 时间旧的在前
 - [x] **GET** `/view/direct/$id` --> *JPEG/PNG/GIF*
   - 返回id为$id的图片
-- [x] **GET** `/view/status/$id` --> *JSON*
+- [ ] **GET** `/view/info/$id` --> *JSON*
   - 返回$id图片信息
 - [x] **GET** `/view/random?type=$type` --> *JPEG/PNG/GIF*
   - 返回随机id
