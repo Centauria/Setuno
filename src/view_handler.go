@@ -33,9 +33,9 @@ func viewHandler(r *http.Request, w http.ResponseWriter) bool {
 			return viewHandlerDirect(url, com[1], w)
 		}
 
-		// 命令 /view/status 的处理
-		if len(com) == 2 && com[0] == "status" {
-			return viewHandlerStatus(url, com[1], w)
+		// 命令 /view/info 的处理
+		if len(com) == 2 && com[0] == "info" {
+			return viewHandlerInfo(url, com[1], w)
 		}
 
 		// 命令 /view/random 的处理
@@ -106,15 +106,15 @@ func viewHandlerDirect(url string, id string, w http.ResponseWriter) bool {
 	return true
 }
 
-// 命令 /view/status 的处理
-func viewHandlerStatus(url string, id string, w http.ResponseWriter) bool {
-	statusJson, err := getImageStatusById(id)
+// 命令 /view/info 的处理
+func viewHandlerInfo(url string, id string, w http.ResponseWriter) bool {
+	infoJson, err := getImageInfoById(id)
 	if err != nil {
 		fmt.Println("StatusCode:404, ", err)
 		w.WriteHeader(404)
 		return false
 	}
-	_, _ = w.Write(statusJson)
+	_, _ = w.Write(infoJson)
 	fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
 	return true
 }

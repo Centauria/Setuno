@@ -43,7 +43,7 @@ func getImageById(id string) (string, error) {
 }
 
 //根据_id查询单张图片
-func getImageStatusById(id string) ([]byte, error) {
+func getImageInfoById(id string) ([]byte, error) {
 
 	//连接
 	client, err := connectMongo()
@@ -62,7 +62,7 @@ func getImageStatusById(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	statusJson, err := json.Marshal(result)
+	infoJson, err := json.Marshal(result["info"])
 	if err != nil {
 		fmt.Printf("序列化错误 err=%v\n", err)
 	}
@@ -73,7 +73,7 @@ func getImageStatusById(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	return statusJson, nil
+	return infoJson, nil
 }
 
 //随机获得单张图片

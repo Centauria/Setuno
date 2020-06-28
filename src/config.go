@@ -9,7 +9,7 @@ import (
 // 配置文件
 type configuration struct {
 	Program program `json:"program"`
-	Info    info    `json:"info"`
+	Status  status  `json:"status"`
 	Mongodb mongodb `json:"mongodb"`
 	Path    path    `json:"path"`
 }
@@ -21,7 +21,7 @@ type program struct {
 }
 
 // 版本配置
-type info struct {
+type status struct {
 	GoVersion string `json:"go_version"`
 	Os        string `json:"os"`
 	Arch      string `json:"arch"`
@@ -61,9 +61,9 @@ func initConf(configPath string) error {
 		return err
 	}
 
-	conf.Info.GoVersion = runtime.Version()[2:]
-	conf.Info.Os = runtime.GOOS
-	conf.Info.Arch = runtime.GOARCH
+	conf.Status.GoVersion = runtime.Version()[2:]
+	conf.Status.Os = runtime.GOOS
+	conf.Status.Arch = runtime.GOARCH
 
 	return nil
 }

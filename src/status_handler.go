@@ -7,19 +7,19 @@ import (
 )
 
 //按照命令处理 info
-func infoHandler(r *http.Request, w http.ResponseWriter) bool {
+func statusHandler(r *http.Request, w http.ResponseWriter) bool {
 
 	url := r.URL.String()[len(new):]
 
-	if url == "/info" {
-		msg, _ := json.Marshal(conf.Info)
+	if url == "/status" {
+		msg, _ := json.Marshal(conf.Status)
 		fmt.Println("StatusCode:200, Command \"" + url + "\", Server's information responded")
 		_, _ = w.Write(msg)
 		return true
 	}
 
 	//404：找不到资源地址
-	fmt.Println("StatusCode:404, Can't find command \"" + url[5:] + "\" in info")
+	fmt.Println("StatusCode:404, Can't find command \"" + url)
 	w.WriteHeader(404)
 	return false
 

@@ -16,7 +16,7 @@ type command struct {
 }
 
 var commandList = []command{
-	{"/info", "GET", infoHandler},
+	{"/status", "GET", statusHandler},
 	{"/view", "GET", viewHandler},
 	{"/upload", "POST", uploadHandler},
 	{"/count", "GET", countHandler},
